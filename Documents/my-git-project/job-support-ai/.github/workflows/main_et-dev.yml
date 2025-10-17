@@ -1,0 +1,70 @@
+# Docs: https://github.com/Azure/webapps-deploy
+name: Build and deploy React (client) to Azure Web App - et-dev
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ★ client/ ディレクトリでビルド
+      - name: Build client (Vite)
+        working-directory: client
+        run: |
+          # 本番APIのURLをここで注入（必要に応じて修正）
+          echo "VITE_API_BASE=https://<api-app-name>.azurewebsites.net" > .env
+          npm ci
+          npm run build
+
+      # dist/ の中身だけを成果物にまとめる
+      - name: Prepare artifact
+        run: |
+          rm -rf artifact && mkdir -p artifact
+          cp -R client/dist/* artifact/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: artifact
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: artifact
+
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id:        ${{ secrets.AZUREAPPSERVICE_CLIENTID_B96FB053BCF34F54A8A0772C296A9151 }}
+          tenant-id:        ${{ secrets.AZUREAPPSERVICE_TENANTID_90C92F585F6B4B5495A06D0C047E6FF3 }}
+          subscription-id:  ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FF173B421B1240A18F96D6A23CD7AA48 }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'et-dev'
+          slot-name: 'Production'
+          package: artifact
