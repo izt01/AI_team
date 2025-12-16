@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>求人登録</title>
+</head>
+<body>
+    <h1>求人情報登録</h1>
+    <form method="POST" action="/job/new">
+        <label for="company_name">会社名:</label>
+        <input type="text" id="company_name" name="company_name" required><br>
+
+        <label for="job_title">募集職種:</label>
+        <input type="text" id="job_title" name="job_title" required><br>
+
+        <label for="location_prefecture">勤務地（都道府県）:</label>
+        <input type="text" id="location_prefecture" name="location_prefecture" required><br>
+
+        <label for="salary_min">推定年収（最低）:</label>
+        <input type="number" id="salary_min" name="salary_min" required><br>
+
+        <label for="salary_max">推定年収（最高）:</label>
+        <input type="number" id="salary_max" name="salary_max" required><br>
+
+        <label for="work_hours">勤務時間帯:</label>
+        <input type="text" id="work_hours" name="work_hours" required><br>
+
+        <label for="holiday_policy">休日制度:</label>
+        <input type="text" id="holiday_policy" name="holiday_policy" required><br>
+
+        <label for="job_summary">業務内容:</label><br>
+        <textarea id="job_summary" name="job_summary" rows="4" cols="50" required></textarea><br>
+
+        <!-- 任意項目 -->
+        <label for="bonus">賞与:</label>
+        <input type="text" id="bonus" name="bonus"><br>
+
+        <label for="overtime">残業（月平均）:</label>
+        <input type="text" id="overtime" name="overtime"><br>
+
+        <label for="workplace_atmosphere">会社の雰囲気:</label>
+        <input type="text" id="workplace_atmosphere" name="workplace_atmosphere"><br>
+
+        <button type="submit">求人を登録</button>
+    </form>
+</body>
+</html>

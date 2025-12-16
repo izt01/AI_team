@@ -1,0 +1,48 @@
+<h2>ようこそ {{ user_name }} さん</h2>
+<p>📧 メール: {{ email }}</p>
+
+<p>💼 希望職種: {{ job_title }}</p>
+<p>💰 希望年収: {{ salary }} 万円</p>
+<p>📍 希望勤務地: {{ location }}</p>
+
+{% if employment_type %}
+<p>📝 雇用形態: {{ employment_type }}</p>
+{% endif %}
+
+{% if work_hours %}
+<p>⏰ 勤務時間帯: {{ work_hours }}</p>
+{% endif %}
+
+{% if holiday_policy %}
+<p>🏖️ 休日制度: {{ holiday_policy }}</p>
+{% endif %}
+
+{% if workplace_atmosphere %}
+<p>🎭 職場の雰囲気: {{ workplace_atmosphere }}</p>
+{% endif %}
+
+{% if remote %}
+<p>💻 リモート勤務希望: {{ remote }}</p>
+{% endif %}
+
+{% if employee_benefits %}
+<p>🎁 福利厚生: {{ employee_benefits }}</p>
+{% endif %}
+
+{% if job_summary %}
+<p>📄 業務内容: {{ job_summary }}</p>
+{% endif %}
+
+{% if skills %}
+<p>🛠️ スキル: {{ skills }}</p>
+{% endif %}
+
+{% if certifications %}
+<p>📜 資格・検定: {{ certifications }}</p>
+{% endif %}
+
+<hr>
+<!-- チャット画面へ遷移するボタン -->
+<form action="{{ url_for('chat_page') }}" method="get">
+    <button type="submit">💬 チャットを開始する</button>
+</form>

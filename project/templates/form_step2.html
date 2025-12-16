@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>希望条件入力 (Step2)</title>
+</head>
+<body>
+    <h2>希望条件を入力してください</h2>
+    <form method="POST">
+        <!-- 希望職種 -->
+        <label for="job_title">希望職種:</label>
+        <input type="text" id="job_title" name="job_title" placeholder="例: デザイナー / エンジニア / 営業">
+
+        <!-- 希望勤務地 -->
+        <label for="location_prefecture">希望勤務地:</label>
+        <input type="text" id="location_prefecture" name="location_prefecture" placeholder="例: 東京都 / 静岡県 / 大阪府">
+
+        <!-- 希望年収 -->
+        <label for="salary_min">希望年収（最低年収・万円）:</label>
+        <input type="number" id="salary_min" name="salary_min" min="100" step="10" required>
+        <p>※ 数字のみ入力してください（例: 400 → 400万円）</p>
+        <hr>
+
+        <button type="submit">次へ</button>
+    </form>
+
+    <script>
+        document.getElementById("salary").addEventListener("input", function(e) {
+        // 数字以外を削除（万とか円を入れても数字だけ残す）
+        this.value = this.value.replace(/\D/g, "");
+    });
+    </script>
+
+</body>
+</html>
