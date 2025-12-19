@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スカウト履歴 - 企業管理画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .filter-group {
+            flex: 1;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .scouts-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+        }
+
+        .scouts-table thead {
+            background: #f8f9fa;
+        }
+
+        .scouts-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .scouts-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .scouts-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .scouts-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-sent {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-read {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-replied {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-declined {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .auto-badge {
+            background: #f0f0f0;
+            color: #666;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        .message-preview {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .date-text {
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📨 スカウト履歴</h1>
+            <div class="nav-links">
+                <a href="/dashboard">ダッシュボード</a>
+                <a href="/jobs">求人一覧</a>
+                <a href="/scouts">スカウト履歴</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 統計カード -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number">{{ scouts|length }}</div>
+                    <div class="label">総スカウト数</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="number">{{ scouts|selectattr('status', 'equalto', 'sent')|list|length }}</div>
+                    <div class="label">未読</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="number">{{ scouts|selectattr('status', 'equalto', 'read')|list|length }}</div>
+                    <div class="label">既読</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <div class="number">{{ scouts|selectattr('status', 'equalto', 'replied')|list|length }}</div>
+                    <div class="label">返信あり</div>
+                </div>
+            </div>
+
+            <!-- フィルター -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>ステータス</label>
+                    <select id="statusFilter" onchange="filterTable()">
+                        <option value="">すべて</option>
+                        <option value="sent">未読</option>
+                        <option value="read">既読</option>
+                        <option value="replied">返信あり</option>
+                        <option value="declined">辞退</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>求人</label>
+                    <select id="jobFilter" onchange="filterTable()">
+                        <option value="">すべての求人</option>
+                        {% for scout in scouts %}
+                            <option value="{{ scout.job_title }}">{{ scout.job_title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>検索</label>
+                    <input type="text" id="searchInput" placeholder="ユーザー名で検索..." onkeyup="filterTable()">
+                </div>
+            </div>
+
+            <!-- スカウト履歴テーブル -->
+            {% if scouts %}
+            <table class="scouts-table" id="scoutsTable">
+                <thead>
+                    <tr>
+                        <th>送信日時</th>
+                        <th>求人</th>
+                        <th>候補者</th>
+                        <th>メッセージ</th>
+                        <th>ステータス</th>
+                        <th>返信日時</th>
+                        <th>アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scout in scouts %}
+                    <tr data-status="{{ scout.status }}" data-job="{{ scout.job_title }}" data-user="{{ scout.user_name or 'ユーザー' }}">
+                        <td class="date-text">
+                            {{ scout.created_at.strftime('%Y/%m/%d %H:%M') if scout.created_at else '-' }}
+                        </td>
+                        <td>
+                            <strong>{{ scout.job_title }}</strong>
+                        </td>
+                        <td>
+                            {{ scout.user_name or 'ユーザー' }}
+                        </td>
+                        <td>
+                            <div class="message-preview">
+                                {{ scout.message_text[:50] }}...
+                                {% if scout.auto_generated %}
+                                <span class="auto-badge">🤖 AI生成</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ scout.status }}">
+                                {% if scout.status == 'sent' %}
+                                    📧 未読
+                                {% elif scout.status == 'read' %}
+                                    👁️ 既読
+                                {% elif scout.status == 'replied' %}
+                                    ✅ 返信あり
+                                {% elif scout.status == 'declined' %}
+                                    ❌ 辞退
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="date-text">
+                            {% if scout.replied_at %}
+                                {{ scout.replied_at.strftime('%Y/%m/%d %H:%M') }}
+                            {% elif scout.read_at %}
+                                {{ scout.read_at.strftime('%Y/%m/%d %H:%M') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/candidate/{{ scout.user_id }}" class="action-btn btn-view">
+                                詳細を見る
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                </svg>
+                <h3>スカウト履歴がありません</h3>
+                <p>まだスカウトを送信していません。求人ページからスカウトを送信してください。</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const jobFilter = document.getElementById('jobFilter').value.toLowerCase();
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const table = document.getElementById('scoutsTable');
+            
+            if (!table) return;
+            
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            for (let row of rows) {
+                const status = row.getAttribute('data-status').toLowerCase();
+                const job = row.getAttribute('data-job').toLowerCase();
+                const user = row.getAttribute('data-user').toLowerCase();
+                
+                let showRow = true;
+                
+                // ステータスフィルター
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                // 求人フィルター
+                if (jobFilter && job !== jobFilter) {
+                    showRow = false;
+                }
+                
+                // 検索フィルター
+                if (searchInput && !user.includes(searchInput)) {
+                    showRow = false;
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

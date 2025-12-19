@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>候補者詳細 - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #f5576c;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: #f093fb;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .profile-title {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .match-score-large {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            text-align: left;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-icon {
+            font-size: 20px;
+            width: 30px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .scout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .scout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-icon {
+            font-size: 28px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .personality-item {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f093fb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .personality-icon {
+            font-size: 24px;
+        }
+
+        .personality-text {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .analysis-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .history-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
+            border-radius: 15px;
+            font-size: 13px;
+            color: #f5576c;
+            margin: 3px;
+            border: 1px solid rgba(245, 87, 108, 0.3);
+        }
+
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px 0;
+            border-top: 2px solid #e0e0e0;
+            margin-top: 20px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+
+        .bar {
+            background: linear-gradient(to top, #f093fb 0%, #f5576c 100%);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+
+        .bar-label {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .bar-value {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .tags-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-large {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #f093fb;
+            border-radius: 20px;
+            color: #f5576c;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .tag-large:hover {
+            background: #f093fb;
+            color: white;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/scout/ai-search" class="back-btn">← スカウト検索に戻る</a>
+            <h1>候補者詳細分析</h1>
+        </div>
+
+        <div class="main-grid">
+            <!-- サイドバー：プロフィール -->
+            <div class="sidebar">
+                <div class="profile-card">
+                    <div class="avatar">👤</div>
+                    <div class="profile-name">{{ candidate.user_name or 'ユーザー' + candidate.user_id|string }}</div>
+                    <div class="profile-title">{{ candidate.job_title or '職種未設定' }}</div>
+                    
+                    <div class="match-score-large">
+                        {{ candidate.match_score }}点
+                    </div>
+
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <span class="info-icon">💼</span>
+                            <div>
+                                <div class="info-label">希望職種</div>
+                                <div class="info-value">{{ candidate.job_title or '未設定' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <div>
+                                <div class="info-label">希望勤務地</div>
+                                <div class="info-value">{{ candidate.location_prefecture or '未設定' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">💰</span>
+                            <div>
+                                <div class="info-label">希望年収</div>
+                                <div class="info-value">{{ candidate.salary_min or '未設定' }}万円</div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">📧</span>
+                            <div>
+                                <div class="info-label">メールアドレス</div>
+                                <div class="info-value">{{ candidate.email or '非公開' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-icon">🎯</span>
+                            <div>
+                                <div class="info-label">キャリア志向</div>
+                                <div class="info-value">{{ candidate.career_orientation or '未設定' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="scout-btn" onclick="scoutCandidate({{ candidate.user_id }})">
+                        📨 スカウトを送信
+                    </button>
+                </div>
+            </div>
+
+            <!-- メインコンテンツ -->
+            <div class="content-area">
+                <!-- 性格分析 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-icon">🧠</span>
+                        <h2 class="section-title">AI性格分析</h2>
+                    </div>
+
+                    {% if candidate.analysis_data %}
+                    <div class="analysis-box">
+                        <strong>📊 総合分析:</strong><br>
+                        {{ candidate.analysis_data.summary or 'データがありません' }}
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; color: #666; font-size: 16px;">性格特性</h3>
+                    <div class="personality-grid">
+                        {% for trait in candidate.analysis_data.personality_traits or [] %}
+                        <div class="personality-item">
+                            <span class="personality-icon">✨</span>
+                            <span class="personality-text">{{ trait }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if candidate.analysis_data.work_values %}
+                    <h3 style="margin: 25px 0 15px 0; color: #666; font-size: 16px;">仕事の価値観</h3>
+                    <div class="tags-cloud">
+                        {% for value in candidate.analysis_data.work_values %}
+                        <div class="tag-large">{{ value }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="empty-state">
+                        性格分析データがまだありません
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 検索履歴 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-icon">🔍</span>
+                        <h2 class="section-title">検索履歴分析</h2>
+                    </div>
+
+                    {% if search_history and search_history|length > 0 %}
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>検索日時</th>
+                                <th>検索キーワード</th>
+                                <th>求人ID</th>
+                                <th>アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in search_history %}
+                            <tr>
+                                <td>{{ history.searched_at.strftime('%Y/%m/%d %H:%M') if history.searched_at else '-' }}</td>
+                                <td>
+                                    {% if history.search_keywords %}
+                                        {% for keyword in history.search_keywords.split(',')[:3] %}
+                                        <span class="keyword-tag">{{ keyword.strip() }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>{{ history.job_id or '-' }}</td>
+                                <td>{{ history.action_type or '閲覧' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- 検索傾向グラフ -->
+                    {% if search_trends and search_trends|length > 0 %}
+                    <h3 style="margin: 30px 0 15px 0; color: #666; font-size: 16px;">検索傾向の分析</h3>
+                    <div class="chart-container">
+                        {% set max_count = search_trends | map(attribute='count') | max %}
+                        {% for item in search_trends %}
+                        <div class="chart-bar">
+                            <div class="bar" style="height: {{ (item.count / max_count * 200) if max_count > 0 else 0 }}px;"></div>
+                            <div class="bar-label">{{ item.keyword }}</div>
+                            <div class="bar-value">{{ item.count }}回</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="empty-state">
+                        <p>まだ検索履歴がありません</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- チャット履歴 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-icon">💬</span>
+                        <h2 class="section-title">AIとの会話履歴</h2>
+                    </div>
+
+                    {% if chat_history and chat_history|length > 0 %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for chat in chat_history %}
+                        <div style="background: {{ '#f0f7ff' if loop.index % 2 == 0 else '#f8f9fa' }}; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 3px solid #f093fb;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 5px;">
+                                {{ chat.created_at.strftime('%Y/%m/%d %H:%M') if chat.created_at else '-' }}
+                            </div>
+                            <div style="font-size: 14px; color: #333; line-height: 1.6;">
+                                <strong>ユーザー:</strong> {{ chat.user_message[:100] }}...
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <p>まだチャット履歴がありません</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function scoutCandidate(userId) {
+            const message = prompt('スカウトメッセージを入力してください（空欄の場合はAIが自動生成します）:');
+            
+            if (message === null) return;
+
+            try {
+                const response = await fetch('/api/scout/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        message: message || null,
+                        auto_generate: !message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ スカウトを送信しました！');
+                } else {
+                    alert('❌ エラー: ' + (data.error || '送信に失敗しました'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ 通信エラーが発生しました');
+            }
+        }
+    </script>
+</body>
+</html>

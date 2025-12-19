@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>求人一覧 - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            animation: fadeIn 0.5s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out 0.3s both;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .job-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.5s ease-out 0.4s both;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .job-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .job-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .job-badge {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .job-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .detail-icon {
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .salary {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .salary-range {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .view-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 20px;
+            padding: 80px 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-right {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .job-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-input {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <div class="header-left">
+                <h1>💼 求人一覧</h1>
+                <div class="header-subtitle">登録されている求人情報を確認できます</div>
+            </div>
+            <div class="header-right">
+                <a href="/dashboard" class="btn btn-secondary">
+                    📊 ダッシュボード
+                </a>
+                <a href="/job/new" class="btn btn-primary">
+                    ➕ 新規求人登録
+                </a>
+            </div>
+        </div>
+
+        <!-- 統計バー -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value">{{ jobs|length }}</div>
+                <div class="stat-label">登録求人数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">👀</div>
+                <div class="stat-value">-</div>
+                <div class="stat-label">総閲覧数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">📨</div>
+                <div class="stat-value">-</div>
+                <div class="stat-label">応募数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value">-</div>
+                <div class="stat-label">お気に入り</div>
+            </div>
+        </div>
+
+        <!-- フィルターバー -->
+        <div class="filter-bar">
+            <span class="filter-label">🔍</span>
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="filter-input" 
+                placeholder="求人を検索（職種、会社名、キーワードなど）"
+                onkeyup="filterJobs()"
+            >
+            <select id="sortSelect" class="filter-input" style="flex: 0 0 200px;" onchange="sortJobs()">
+                <option value="newest">新着順</option>
+                <option value="salary-high">年収が高い順</option>
+                <option value="salary-low">年収が低い順</option>
+                <option value="company">会社名順</option>
+            </select>
+        </div>
+
+        <!-- 求人グリッド -->
+        {% if jobs and jobs|length > 0 %}
+        <div class="job-grid" id="jobGrid">
+            {% for job in jobs %}
+            <div class="job-card" data-company="{{ job.company_name }}" data-title="{{ job.job_title }}" data-tags="{{ job.intent_labels }}" data-salary-min="{{ job.salary_min }}" data-salary-max="{{ job.salary_max }}">
+                <div class="job-header">
+                    <div class="company-info">
+                        <div class="company-name">🏢 {{ job.company_name }}</div>
+                        <div class="job-title">{{ job.job_title }}</div>
+                    </div>
+                    <div class="job-badge">NEW</div>
+                </div>
+
+                <div class="job-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">📍</span>
+                        <span>{{ job.location_prefecture or '勤務地未設定' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">👥</span>
+                        <span>{{ job.employment_type or '雇用形態未設定' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏰</span>
+                        <span>{{ job.work_hours or '勤務時間未設定' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">🏖️</span>
+                        <span>{{ job.holiday_policy or '休日未設定' }}</span>
+                    </div>
+                </div>
+
+                {% if job.intent_labels %}
+                <div class="tags">
+                    {% for label in job.intent_labels.split(',')[:5] %}
+                    <span class="tag">{{ label.strip() }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="job-footer">
+                    <div>
+                        <div class="salary">
+                            💰 {{ job.salary_min }}万円〜
+                        </div>
+                        <div class="salary-range">
+                            最大 {{ job.salary_max }}万円
+                        </div>
+                    </div>
+                    <a href="/job/{{ job.id }}" class="view-btn">
+                        詳細を見る →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-title">まだ求人が登録されていません</div>
+            <div class="empty-text">
+                最初の求人を登録して、優秀な人材を見つけましょう！
+            </div>
+            <a href="/job/new" class="btn btn-primary">
+                ➕ 求人を登録する
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // 検索フィルター
+        function filterJobs() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const jobCards = document.querySelectorAll('.job-card');
+
+            jobCards.forEach(card => {
+                const company = card.dataset.company.toLowerCase();
+                const title = card.dataset.title.toLowerCase();
+                const tags = card.dataset.tags.toLowerCase();
+
+                const match = company.includes(searchValue) || 
+                             title.includes(searchValue) || 
+                             tags.includes(searchValue);
+
+                if (match) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease-out';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // ソート機能
+        function sortJobs() {
+            const sortValue = document.getElementById('sortSelect').value;
+            const jobGrid = document.getElementById('jobGrid');
+            const jobCards = Array.from(document.querySelectorAll('.job-card'));
+
+            jobCards.sort((a, b) => {
+                switch(sortValue) {
+                    case 'salary-high':
+                        return parseInt(b.dataset.salaryMax) - parseInt(a.dataset.salaryMax);
+                    case 'salary-low':
+                        return parseInt(a.dataset.salaryMin) - parseInt(b.dataset.salaryMin);
+                    case 'company':
+                        return a.dataset.company.localeCompare(b.dataset.company);
+                    case 'newest':
+                    default:
+                        return 0; // 元の順序を保持
+                }
+            });
+
+            // DOMを再構築
+            jobCards.forEach(card => jobGrid.appendChild(card));
+        }
+
+        // カードクリックで詳細ページへ
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // ボタンクリックの場合は除外
+                if (e.target.classList.contains('view-btn')) return;
+                
+                const link = card.querySelector('.view-btn');
+                if (link) {
+                    window.location.href = link.href;
+                }
+            });
+        });
+
+        // 初期表示時のアニメーション
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.job-card').forEach((card, index) => {
+                card.style.animation = `fadeIn 0.5s ease-out ${0.1 * index}s both`;
+            });
+        });
+    </script>
+</body>
+</html>

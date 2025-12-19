@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>求人チャット - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 550px 1fr;
+            gap: 20px;
+            height: 100vh;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* チャットエリア（左側） */
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideLeft 0.5s ease-out;
+        }
+
+        @keyframes slideLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+        }
+
+        .chat-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-info {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            max-width: 85%;
+            margin-bottom: 15px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 求人リストエリア（右側） */
+        .jobs-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideRight 0.5s ease-out;
+        }
+
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .jobs-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .jobs-header h2 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .jobs-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .jobs-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .jobs-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .jobs-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .jobs-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .job-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .job-card:hover {
+            border-color: #f5576c;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .job-company {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .job-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .job-detail-item {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .job-summary {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .job-button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .job-button-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .job-button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .job-button-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .job-button-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- チャットエリア -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>
+                    <span class="status-indicator"></span>
+                    💬 求人提案チャット
+                </h2>
+                <p class="chat-info">AIがあなたに最適な求人を提案します</p>
+            </div>
+
+            <div class="chat-box" id="chatMessages">
+                {% if initial_message %}
+                <div class="message ai">{{ initial_message|safe }}</div>
+                {% endif %}
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <form class="input-form" id="chatForm">
+                    <input
+                        type="text"
+                        class="input-field"
+                        id="userInput"
+                        placeholder="メッセージを入力..."
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="send-button" id="sendButton">
+                        ➤ 送信
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 求人リストエリア -->
+        <div class="jobs-container">
+            <div class="jobs-header">
+                <h2>
+                    📋 提案された求人
+                </h2>
+                <div class="jobs-count" id="jobsCount">0件</div>
+            </div>
+
+            <div class="jobs-list" id="jobsList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>まだ求人がありません</h3>
+                    <p>チャットで希望条件を伝えると、<br>AIがおすすめの求人を提案します</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const jobsList = document.getElementById('jobsList');
+        const jobsCount = document.getElementById('jobsCount');
+
+        // テキストから求人情報を抽出する関数
+        function extractJobsFromText(text) {
+            console.log('抽出開始:', text);
+            
+            const jobs = [];
+            const lines = text.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // 求人IDのパターンをチェック
+                const jobIdMatch = line.match(/【ID:([a-f0-9-]+)】/);
+                if (!jobIdMatch) continue;
+                
+                const jobId = jobIdMatch[1];
+                
+                // タイトル抽出
+                let title = line.replace(/【ID:[a-f0-9-]+】/, '').trim();
+                title = title.replace(/^\d+\.\s*/, ''); // 番号を削除
+                title = title.split('（')[0].trim(); // カッコ前まで
+                
+                // 会社名抽出（次の行）
+                let company = '';
+                if (i + 1 < lines.length) {
+                    const nextLine = lines[i + 1].trim();
+                    if (nextLine.includes('企業:') || nextLine.includes('会社:')) {
+                        company = nextLine.replace(/企業:|会社:/, '').trim();
+                    }
+                }
+                
+                // 給与情報抽出
+                let salary = '';
+                const salaryMatch = line.match(/(\d+)万〜(\d+)万/);
+                if (salaryMatch) {
+                    salary = `${salaryMatch[1]}万〜${salaryMatch[2]}万円`;
+                } else {
+                    const salaryMatch2 = line.match(/(\d+)万円/);
+                    if (salaryMatch2) {
+                        salary = `${salaryMatch2[1]}万円〜`;
+                    }
+                }
+                
+                // 勤務地抽出
+                let location = '';
+                const locationMatch = line.match(/（([^）]+)）/);
+                if (locationMatch) {
+                    location = locationMatch[1];
+                }
+                
+                jobs.push({
+                    id: jobId,
+                    title: title || '職種名なし',
+                    company: company || '企業名なし',
+                    salary: salary || '応相談',
+                    location: location || '勤務地不明',
+                    summary: 'チャットで詳細をお聞きください'
+                });
+            }
+            
+            console.log('抽出された求人:', jobs.length + '件', jobs);
+            return jobs;
+        }
+
+        // 求人カードを作成
+        function createJobCard(job, index) {
+            const card = document.createElement('div');
+            card.className = 'job-card';
+            
+            // フィールド名をAPIレスポンスに合わせる
+            const title = job.job_title || job.title || '職種名不明';
+            const company = job.company_name || job.company || '企業名不明';
+            const salaryMin = job.salary_min || 0;
+            const salaryMax = job.salary_max || 0;
+            const salary = salaryMax > 0 ? `${salaryMin}万〜${salaryMax}万円` : `${salaryMin}万円〜`;
+            const location = job.location_prefecture || job.location || '勤務地不明';
+            const summary = job.summary || 'チャットで詳細をお聞きください';
+            
+            // ✅ コサイン類似度を0-100%にスケーリング
+            let similarityDisplay = '';
+            if (job.similarity !== undefined && job.similarity !== null) {
+                // -1〜1 を 0〜100 に変換
+                const matchPercent = ((job.similarity + 1) / 2 * 100).toFixed(1);
+                
+                // 色分け
+                let color = '#666';  // デフォルト
+                if (matchPercent >= 80) color = '#10b981';      // 緑（高マッチ）
+                else if (matchPercent >= 60) color = '#f59e0b'; // オレンジ（中マッチ）
+                else if (matchPercent >= 40) color = '#6b7280'; // グレー（低マッチ）
+                else color = '#ef4444';                         // 赤（ミスマッチ）
+                
+                similarityDisplay = ` <span style="color: ${color}; font-weight: bold;">(マッチ度: ${matchPercent}%)</span>`;
+            }
+            
+            card.innerHTML = `
+                <div class="job-title">${title}${similarityDisplay}</div>
+                <div class="job-company">🏢 ${company}</div>
+                <div class="job-details">
+                    <div class="job-detail-item">💰 ${salary}</div>
+                    <div class="job-detail-item">📍 ${location}</div>
+                </div>
+                <div class="job-summary">${summary}</div>
+                <div class="job-actions">
+                    <button class="job-button job-button-primary" onclick="viewJobDetail('${job.id}')">
+                        詳細を見る
+                    </button>
+                    <button class="job-button job-button-secondary" onclick="saveJob('${job.id}')">
+                        保存
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        // 求人リストを更新
+        function updateJobsList(jobs) {
+            jobsList.innerHTML = '';
+
+            if (!jobs || jobs.length === 0) {
+                jobsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>まだ求人がありません</h3>
+                        <p>チャットで希望条件を伝えると、<br>AIがおすすめの求人を提案します</p>
+                    </div>
+                `;
+                jobsCount.textContent = '0件';
+                return;
+            }
+
+            jobs.forEach((job, index) => {
+                const card = createJobCard(job, index);
+                card.style.animationDelay = `${index * 0.05}s`;
+                jobsList.appendChild(card);
+            });
+
+            jobsCount.textContent = `${jobs.length}件`;
+            jobsList.scrollTop = 0;
+        }
+
+        // メッセージを追加
+        function addMessage(message, sender) {
+            // undefined チェック
+            if (!message) {
+                console.warn('addMessage: message is undefined or null');
+                return;
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            // 文字列に変換
+            messageDiv.innerHTML = String(message).replace(/\n/g, '<br>');
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // フォーム送信
+        chatForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const msg = userInput.value.trim();
+
+            if (!msg) return;
+
+            // ★ 修正: 引数の順序を正しく (message, sender)
+            addMessage(msg, 'user');
+            userInput.value = '';
+
+            // タイピングインジケーター表示
+            typingIndicator.classList.add('active');
+            sendButton.disabled = true;
+
+            try {
+                // APIへ送信
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+
+                const data = await res.json();
+                console.log('API Response:', data);  // デバッグ用
+
+                // タイピングインジケーター非表示
+                typingIndicator.classList.remove('active');
+
+                // ★ 修正: data.response を使用 (main.pyと統一)
+                if (data.response) {
+                    addMessage(data.response, 'ai');
+                    
+                    // メッセージから求人を自動抽出
+                    const extractedJobs = extractJobsFromText(data.response);
+                    if (extractedJobs.length > 0) {
+                        updateJobsList(extractedJobs);
+                    }
+                }
+
+                // APIから直接求人データが来る場合も対応
+                if (data.jobs && data.jobs.length > 0) {
+                    updateJobsList(data.jobs);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.classList.remove('active');
+                // ★ 修正: 引数の順序を正しく
+                addMessage('エラーが発生しました。もう一度お試しください。', 'ai');
+            } finally {
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        };
+
+        // 初期フォーカス
+        userInput.focus();
+
+        // 初期求人データがあれば表示
+        {% if jobs %}
+        const initialJobs = {{ jobs|tojson }};
+        if (initialJobs && initialJobs.length > 0) {
+            updateJobsList(initialJobs);
+        }
+        {% endif %}
+
+        // 初期メッセージから求人を抽出
+        {% if initial_message %}
+        setTimeout(() => {
+            const initialMessage = `{{ initial_message|safe }}`;
+            const extractedFromInitial = extractJobsFromText(initialMessage);
+            if (extractedFromInitial.length > 0) {
+                updateJobsList(extractedFromInitial);
+            }
+        }, 500);
+        {% endif %}
+
+        // 求人詳細表示（ダミー）
+        function viewJobDetail(jobId) {
+            window.location.href = `/job/${jobId}`;
+        }
+
+        // 求人保存（ダミー）
+        function saveJob(jobId) {
+            alert('求人を保存しました: ' + jobId);
+        }
+    </script>
+</body>
+</html>
