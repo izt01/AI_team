@@ -12,15 +12,18 @@ from psycopg2.extras import RealDictCursor
 load_dotenv()
 
 
-def get_db_conn(use_dict_cursor=False):
+def get_db_conn():
     """
     データベース接続を取得
     
-    Args:
-        use_dict_cursor: True の場合、RealDictCursor を使用（辞書形式で結果取得）
-    
     Returns:
         psycopg2.connection: データベース接続オブジェクト
+    
+    使用例:
+        conn = get_db_conn()
+        cur = conn.cursor()
+        # または
+        cur = conn.cursor(cursor_factory=RealDictCursor)
     """
     try:
         conn = psycopg2.connect(
@@ -30,11 +33,6 @@ def get_db_conn(use_dict_cursor=False):
             user=os.getenv("DB_USER", "devuser"),
             password=os.getenv("DB_PASSWORD", "devpass")
         )
-        
-        # DictCursorが必要な場合は設定
-        if use_dict_cursor:
-            return conn
-        
         return conn
     except Exception as e:
         print(f"❌ データベース接続エラー: {e}")
@@ -51,6 +49,10 @@ def get_db_cursor(conn, use_dict_cursor=False):
     
     Returns:
         カーソルオブジェクト
+    
+    使用例:
+        conn = get_db_conn()
+        cur = get_db_cursor(conn, use_dict_cursor=True)
     """
     if use_dict_cursor:
         return conn.cursor(cursor_factory=RealDictCursor)

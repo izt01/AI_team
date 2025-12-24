@@ -322,11 +322,28 @@
             transform: translateY(-2px);
         }
 
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .job-match {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 4px 8px;
+            background: #f3f4f6;
+            border-radius: 6px;
+        }
+
         .job-title {
             font-size: 18px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
+            flex: 1;
         }
 
         .job-company {
@@ -340,8 +357,8 @@
 
         .job-details {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
             margin-bottom: 15px;
         }
 
@@ -576,13 +593,13 @@
             const salaryMax = job.salary_max || 0;
             const salary = salaryMax > 0 ? `${salaryMin}万〜${salaryMax}万円` : `${salaryMin}万円〜`;
             const location = job.location_prefecture || job.location || '勤務地不明';
-            const summary = job.summary || 'チャットで詳細をお聞きください';
+            const summary = job.match_reasoning || job.summary || 'マッチ度を分析中...';
+            const remoteOption = job.remote_option || job.remote_work || 'なし';
             
-            // ✅ コサイン類似度を0-100%にスケーリング
-            let similarityDisplay = '';
-            if (job.similarity !== undefined && job.similarity !== null) {
-                // -1〜1 を 0〜100 に変換
-                const matchPercent = ((job.similarity + 1) / 2 * 100).toFixed(1);
+            // 🔥 match_percentageを使用
+            let matchDisplay = '';
+            if (job.match_percentage !== undefined && job.match_percentage !== null) {
+                const matchPercent = job.match_percentage;
                 
                 // 色分け
                 let color = '#666';  // デフォルト
@@ -591,22 +608,38 @@
                 else if (matchPercent >= 40) color = '#6b7280'; // グレー（低マッチ）
                 else color = '#ef4444';                         // 赤（ミスマッチ）
                 
-                similarityDisplay = ` <span style="color: ${color}; font-weight: bold;">(マッチ度: ${matchPercent}%)</span>`;
+                matchDisplay = `<span style="color: ${color}; font-weight: bold;">マッチ度: ${matchPercent}%</span>`;
+            }
+            
+            // リモート表示
+            let remoteDisplay = '';
+            if (remoteOption && remoteOption !== 'なし' && remoteOption !== 'none') {
+                if (remoteOption.includes('完全') || remoteOption.includes('フル') || remoteOption.includes('リモート可')) {
+                    remoteDisplay = '🏠 完全リモート可';
+                } else if (remoteOption.includes('ハイブリッド') || remoteOption.includes('一部')) {
+                    remoteDisplay = '🔶 ハイブリッド';
+                }
+            } else {
+                remoteDisplay = '❌ リモート不可';
             }
             
             card.innerHTML = `
-                <div class="job-title">${title}${similarityDisplay}</div>
+                <div class="job-header">
+                    <div class="job-title">${title}</div>
+                    <div class="job-match">${matchDisplay}</div>
+                </div>
                 <div class="job-company">🏢 ${company}</div>
                 <div class="job-details">
                     <div class="job-detail-item">💰 ${salary}</div>
                     <div class="job-detail-item">📍 ${location}</div>
+                    <div class="job-detail-item">${remoteDisplay}</div>
                 </div>
                 <div class="job-summary">${summary}</div>
                 <div class="job-actions">
-                    <button class="job-button job-button-primary" onclick="viewJobDetail('${job.id}')">
+                    <button class="job-button job-button-primary" onclick="viewJobDetail('${job.job_id}')">
                         詳細を見る
                     </button>
-                    <button class="job-button job-button-secondary" onclick="saveJob('${job.id}')">
+                    <button class="job-button job-button-secondary" onclick="saveJob('${job.job_id}')">
                         保存
                     </button>
                 </div>
@@ -621,9 +654,10 @@
             if (!jobs || jobs.length === 0) {
                 jobsList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <h3>まだ求人がありません</h3>
-                        <p>チャットで希望条件を伝えると、<br>AIがおすすめの求人を提案します</p>
+                        <div class="empty-state-icon">💬</div>
+                        <h3>条件を詳しく教えてください</h3>
+                        <p>マッチ度が60%以上になると、<br>こちらにおすすめの求人が表示されます</p>
+                        <p style="margin-top: 10px; font-size: 13px; color: #999;">現在の質問に回答して、<br>より詳しい条件をお聞かせください</p>
                     </div>
                 `;
                 jobsCount.textContent = '0件';
