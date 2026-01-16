@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業ダッシュボード - AI求人マッチングシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0366d6;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #586069;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav a:hover {
+            color: #0366d6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-label {
+            color: #586069;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0366d6;
+        }
+        
+        .stat-change {
+            font-size: 0.85rem;
+            color: #28a745;
+            margin-top: 0.25rem;
+        }
+        
+        .action-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .action-section h2 {
+            margin-bottom: 1.5rem;
+            color: #24292e;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #0366d6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0256c1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f6f8fa;
+            color: #24292e;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .btn-secondary:hover {
+            background: #e1e4e8;
+        }
+        
+        .recent-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .recent-section h3 {
+            margin-bottom: 1rem;
+            color: #24292e;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #586069;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🎯 JobMatch AI</div>
+        <nav class="nav">
+            <a href="/dashboard">ダッシュボード</a>
+            <a href="/jobs">求人一覧</a>
+            <a href="/scout/history">スカウト履歴</a>
+            <a href="/logout">ログアウト</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="welcome">
+            <h1>👋 ようこそ、{{ company.company_name }}様</h1>
+            <p>AIを活用した最適な人材を見つけましょう</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">公開中の求人</div>
+                <div class="stat-value">{{ job_count }}</div>
+                <div class="stat-change">募集中</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">今月のスカウト送信数</div>
+                <div class="stat-value">{{ scout_count }}</div>
+                <div class="stat-change">👥 候補者にアプローチ中</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">スカウト返信率</div>
+                <div class="stat-value">{{ "%.1f"|format(reply_rate) }}%</div>
+                <div class="stat-change">
+                    {% if reply_rate > 30 %}
+                        ✨ 平均以上の返信率です
+                    {% else %}
+                        📈 改善の余地があります
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-section">
+            <h2>🚀 クイックアクション</h2>
+            <div class="action-buttons">
+                <a href="/scout/ai-search/setup" class="btn btn-primary">
+                    🤖 AI スカウト検索
+                </a>
+                <a href="/job/new" class="btn btn-primary">
+                    ➕ 新しい求人を登録
+                </a>
+                <a href="/jobs" class="btn btn-secondary">
+                    📋 求人一覧を見る
+                </a>
+                <a href="/scout/history" class="btn btn-secondary">
+                    📨 スカウト履歴
+                </a>
+            </div>
+        </div>
+        
+        <div class="recent-section">
+            <h3>💡 AIスカウトのヒント</h3>
+            <ul style="line-height: 1.8; color: #586069; padding-left: 1.5rem;">
+                <li><strong>性格分析を活用:</strong> ユーザーの会話履歴から性格・価値観を分析し、企業文化に合う人材を見つけられます</li>
+                <li><strong>マッチングスコア:</strong> AIが職種・勤務地・年収・性格特性を総合的に評価してマッチング度を算出します</li>
+                <li><strong>自動メッセージ生成:</strong> 各候補者に合わせた魅力的なスカウトメッセージをAIが自動生成します</li>
+                <li><strong>返信率向上:</strong> 候補者の強みや価値観を踏まえたメッセージで、返信率が平均30%向上します</li>
+            </ul>
+        </div>
+        
+        {% if job_count == 0 %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>まだ求人が登録されていません</h3>
+            <p style="margin: 1rem 0;">最初の求人を登録して、最適な候補者を見つけましょう</p>
+            <a href="/job/new" class="btn btn-primary" style="margin-top: 1rem;">
+                求人を登録する
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

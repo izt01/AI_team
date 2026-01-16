@@ -1,0 +1,26 @@
+# FastAPI Job Matching System - Requirements
+
+# Web Framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+gunicorn==23.0.0
+python-multipart==0.0.20
+
+# Database
+psycopg2-binary==2.9.10
+sqlalchemy==2.0.36
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+pydantic[email]==2.10.3
+
+# OpenAI
+openai==1.58.1
+
+# Environment & Config
+python-dotenv==1.0.1
+
+# Utilities
+pydantic-settings==2.7.0

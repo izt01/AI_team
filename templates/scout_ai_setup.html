@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIスカウト検索 - 条件入力</title>
+  <style>
+    body { font-family: sans-serif; background:#f5f7fa; margin:0; }
+    .container { max-width:720px; margin:40px auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08);}
+    h1 { margin:0 0 12px; }
+    .row { margin:14px 0; }
+    label { display:block; font-weight:600; margin-bottom:6px; }
+    input { width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:16px; }
+    .error { background:#ffecec; color:#b00020; padding:10px 12px; border-radius:8px; margin:12px 0; }
+    .btn { display:inline-block; padding:12px 16px; border-radius:10px; border:none; background:#0366d6; color:#fff; font-weight:700; cursor:pointer; }
+    .hint { color:#586069; font-size:13px; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 AIスカウト検索（事前条件）</h1>
+    <p class="hint">まずは最低限の条件（職種・勤務地・最低年収）を入力してください。入力後、AIとの会話で追加条件を深掘りし、マッチ度80%または10ターンで候補者を提示します。</p>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/scout/ai-search/setup">
+      <div class="row">
+        <label>希望職種</label>
+        <input name="job_title" placeholder="例：エンジニア / フロントエンドエンジニア" value="{{ base.job_title if base else '' }}" required />
+      </div>
+
+      <div class="row">
+        <label>希望勤務地（都道府県）</label>
+        <input name="location" placeholder="例：東京都" value="{{ base.location if base else '' }}" required />
+      </div>
+
+      <div class="row">
+        <label>最低年収（万円）</label>
+        <input name="salary_min" type="number" placeholder="例：450" value="{{ base.salary_min if base else '' }}" required />
+      </div>
+
+      <button class="btn" type="submit">この条件でAIチャットを開始 →</button>
+    </form>
+  </div>
+</body>
+</html>

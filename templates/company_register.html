@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業登録 - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 50px 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+            border: 2px solid #f093fb;
+            border-radius: 20px;
+            color: #f5576c;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .form-header h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #f5576c;
+            margin-left: 3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #999;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 15px 20px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #f093fb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(240, 147, 251, 0.1);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #999;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .password-strength {
+            margin-top: 10px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength.active {
+            display: block;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #f5576c, #f093fb);
+            transition: width 0.3s;
+        }
+
+        .password-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider::before {
+            margin-right: 10px;
+        }
+
+        .divider::after {
+            margin-left: 10px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #f5576c;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .login-link a:hover {
+            color: #f093fb;
+            text-decoration: underline;
+        }
+
+        .benefits {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.05) 0%, rgba(245, 87, 108, 0.05) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .benefits h3 {
+            color: #f5576c;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .benefits ul {
+            list-style: none;
+            font-size: 13px;
+            color: #666;
+            line-height: 2;
+        }
+
+        .benefits ul li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .benefits ul li::before {
+            content: '✓';
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        @media (max-width: 500px) {
+            .register-container {
+                padding: 40px 30px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <div class="logo-icon">🏢</div>
+            <h1>JobMatch AI</h1>
+            <p>企業向け採用プラットフォーム</p>
+            <div style="margin-top: 15px;">
+                <span class="badge">企業アカウント登録</span>
+            </div>
+        </div>
+
+        <div class="form-header">
+            <h2>新規アカウント作成</h2>
+            <p>優秀な人材と出会うための第一歩</p>
+        </div>
+
+        <form method="POST" action="/company/register">
+            <div class="form-group">
+                <label for="company_name">
+                    会社名
+                    <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🏢</span>
+                    <input 
+                        type="text" 
+                        id="company_name" 
+                        name="company_name" 
+                        placeholder="株式会社〇〇"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    メールアドレス
+                    <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="company@example.com"
+                        required
+                    >
+                </div>
+                <span class="input-hint">企業の公式メールアドレスを入力してください</span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    パスワード
+                    <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="8文字以上の安全なパスワード"
+                        required
+                    >
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                </div>
+                <span class="password-hint" id="passwordHint">8文字以上の英数字を組み合わせてください</span>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                アカウントを作成
+            </button>
+
+            <div class="benefits">
+                <h3>
+                    <span>🎯</span>
+                    <span>登録後すぐに使える機能</span>
+                </h3>
+                <ul>
+                    <li>AIによる候補者マッチング</li>
+                    <li>性格分析に基づくスカウト</li>
+                    <li>チャット形式の候補者検索</li>
+                    <li>詳細な採用分析レポート</li>
+                </ul>
+            </div>
+        </form>
+
+        <div class="divider">または</div>
+
+        <div class="login-link">
+            既に登録済みの企業は
+            <a href="/login">ログインはこちら</a>
+        </div>
+    </div>
+
+    <script>
+        // パスワード強度チェック
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthContainer = document.getElementById('passwordStrength');
+        const passwordHint = document.getElementById('passwordHint');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+
+            if (password.length >= 8) strength += 25;
+            if (password.length >= 12) strength += 25;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+            if (/\d/.test(password)) strength += 15;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+
+            if (password.length > 0) {
+                strengthContainer.classList.add('active');
+                strengthBar.style.width = Math.min(strength, 100) + '%';
+
+                if (strength < 40) {
+                    passwordHint.textContent = '弱いパスワードです';
+                    passwordHint.style.color = '#f5576c';
+                } else if (strength < 70) {
+                    passwordHint.textContent = '普通のパスワードです';
+                    passwordHint.style.color = '#ff9800';
+                } else {
+                    passwordHint.textContent = '強力なパスワードです！';
+                    passwordHint.style.color = '#4caf50';
+                }
+            } else {
+                strengthContainer.classList.remove('active');
+                passwordHint.textContent = '8文字以上の英数字を組み合わせてください';
+                passwordHint.style.color = '#999';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI スカウトアシスタント - 企業管理画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 500px;
+            gap: 20px;
+        }
+
+        .chat-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .chat-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message.user {
+            display: flex;
+            gap: 10px;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .avatar.bot {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .avatar.user {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-reply-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .quick-reply-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            height: 700px;
+            overflow-y: auto;
+        }
+
+        .results-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .results-header h2 {
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .results-header h2::before {
+            content: '🎯';
+            font-size: 22px;
+        }
+
+        .results-header p {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .candidate-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 2px solid #e8eaf6;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .candidate-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+        }
+
+        .candidate-card:hover::before {
+            opacity: 1;
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .candidate-info h3 {
+            font-size: 20px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .candidate-info h3::before {
+            content: '👤';
+            font-size: 18px;
+        }
+
+        .candidate-info .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .candidate-info .subtitle span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .candidate-info .subtitle span::before {
+            font-size: 14px;
+        }
+
+        .candidate-info .subtitle span:first-child::before {
+            content: '💼';
+        }
+
+        .candidate-info .subtitle span:last-child::before {
+            content: '⏱️';
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 70px;
+            justify-content: center;
+        }
+
+        .match-score::after {
+            content: '点';
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .candidate-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .candidate-summary {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 12px;
+            border-left: 3px solid #667eea;
+        }
+
+        .candidate-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #e8eaf6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8eaf6 100%);
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #9ca3af;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 16px;
+            border: 2px dashed #e5e7eb;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-top: 16px;
+        }
+
+        .empty-state::before {
+            content: '🔍';
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .results-section {
+                height: auto;
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI スカウトアシスタント</h1>
+            <div class="nav-links">
+                <a href="/dashboard">ダッシュボード</a>
+                <a href="/scouts">スカウト履歴</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- チャットセクション -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h2>💬 スカウト条件を教えてください</h2>
+                    <p>AIが最適な候補者を見つけます</p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <!-- 初期メッセージは動的に生成 -->
+                </div>
+
+                <div class="chat-input">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="メッセージを入力..." 
+                        onkeypress="if(event.key==='Enter') sendMessage()"
+                    >
+                    <button onclick="sendMessage()" id="sendButton">送信</button>
+                </div>
+            </div>
+
+            <!-- 検索結果セクション -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h2>🎯 おすすめ候補者</h2>
+                    <p>条件に合う候補者が表示されます</p>
+                </div>
+
+                <div id="candidateResults">
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <p>左側のチャットで希望条件を入力すると<br>候補者が表示されます</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URLパラメータから基本条件を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobTitle = urlParams.get('job_title') || '未設定';
+        const workLocation = urlParams.get('location') || '未設定';  // locationからworkLocationに変更
+        const salaryMin = urlParams.get('salary_min') || '未設定';
+
+        // コンテキストに基本条件を含める
+        let conversationContext = {
+            job_title: jobTitle,
+            location: workLocation,  // 変更
+            salary_min: salaryMin,
+            turn_count: 0,
+            messages: []
+        };
+
+        // 基本条件を画面に表示（オプション）
+        console.log('基本条件:', {jobTitle, workLocation, salaryMin});  // 変更
+
+        function sendQuickReply(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            console.log('📤 sendMessage called, message:', message);
+            
+            if (!message) {
+                console.log('⚠️ Empty message, returning');
+                return;
+            }
+
+            // ユーザーメッセージを表示
+            addMessage('user', message);
+            input.value = '';
+
+            // ボタンを無効化
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            sendButton.textContent = '処理中...';
+
+            console.log('📡 Sending to API, context:', conversationContext);
+
+            try {
+                // AIにメッセージを送信
+                const response = await fetch('/api/scout/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: conversationContext
+                    })
+                });
+
+                console.log('📥 Response status:', response.status);
+
+                const data = await response.json();
+                console.log('📦 Response data:', data);
+
+                if (data.error) {
+                    addMessage('bot', 'エラーが発生しました: ' + data.error);
+                    return;
+                }
+
+                addMessage('bot', data.response);
+
+                // コンテキスト更新
+                conversationContext = data.context || conversationContext;
+                console.log('🔄 Context updated:', conversationContext);
+
+                // 進捗メッセージ
+                if (typeof data.turn_count === "number" || typeof data.top_score === "number") {
+                    const t = (typeof data.turn_count === "number") ? data.turn_count : "-";
+                    const s = (typeof data.top_score === "number") ? data.top_score : "-";
+                    addMessage('bot', `（進捗: ${t}/10ターン / 現在の最高スコア: ${s}）`);
+                }
+
+                // should_show_results が true の時だけ候補を表示
+                if (data.should_show_results) {
+                    console.log('✅ Showing candidates:', data.candidates);
+                    displayCandidates(data.candidates || []);
+                } else {
+                    // 進捗表示
+                    const resultsDiv = document.getElementById('candidateResults');
+                    const turns = data.turn_count ?? '-';
+                    const topScore = data.top_score ?? '-';
+                    resultsDiv.innerHTML = `
+                        <div class="empty-state">
+                            <p>候補者を絞り込み中です…（${turns} / 3 ターン）<br>
+                            現在の最高スコア: ${topScore}</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                addMessage('bot', '通信エラーが発生しました。もう一度お試しください。');
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = '送信';
+            }
+        }
+
+        function addMessage(type, content) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = type === 'bot' ? '🤖' : '👤';
+            const avatarClass = type === 'bot' ? 'bot' : 'user';
+
+            messageDiv.innerHTML = `
+                <div class="avatar ${avatarClass}">${avatar}</div>
+                <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+            `;
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function displayCandidates(candidates) {
+            const resultsDiv = document.getElementById('candidateResults');
+            
+            if (candidates.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="empty-state">
+                        <p>候補者が見つかりませんでした。<br>データベースを確認してください。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            resultsDiv.innerHTML = candidates.map(candidate => `
+                <div class="candidate-card">
+                    <div class="candidate-header">
+                        <div class="candidate-info">
+                            <h3>${candidate.name || 'ユーザー' + candidate.user_id}</h3>
+                            <div class="subtitle">
+                                <span>${candidate.job_title || '職種未設定'}</span>
+                                <span>経験${candidate.experience || 0}年</span>
+                            </div>
+                        </div>
+                        <div class="match-score">${candidate.score || 0}</div>
+                    </div>
+
+                    <div class="candidate-actions">
+                        <button class="btn btn-secondary" onclick="window.open('/candidate/${candidate.user_id}', '_blank')">
+                            📄 詳細を見る
+                        </button>
+                        <button class="btn btn-primary" onclick="scoutCandidate('${candidate.user_id}')">
+                            📧 スカウトする
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewCandidate(userId) {
+            window.open(`/candidate/${userId}`, '_blank');
+        }
+
+        async function scoutCandidate(userId) {
+            // スカウト送信処理
+            const message = prompt('スカウトメッセージを入力してください（空欄の場合はAIが自動生成します）:');
+            
+            if (message === null) return; // キャンセル
+
+            try {
+                const response = await fetch('/api/scout/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        message: message || null,
+                        auto_generate: !message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ スカウトを送信しました！');
+                } else {
+                    alert('❌ エラー: ' + (data.error || '送信に失敗しました'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ 通信エラーが発生しました');
+            }
+        }
+
+        // ページ読み込み時の初期化（即時実行）
+        // 初期化関数の定義
+        function initChat() {
+            console.log('📱 initChat called');
+            console.log('基本条件:', {jobTitle, workLocation, salaryMin});
+            
+            // 基本条件を含む初期メッセージを表示
+            const initialMessage = `こんにちは！スカウトアシスタントです。<br><br>
+以下の条件で候補者をお探しですね：<br>
+📋 <strong>職種:</strong> ${jobTitle}<br>
+📍 <strong>勤務地:</strong> ${workLocation}<br>
+💰 <strong>最低年収:</strong> ${salaryMin}万円<br><br>
+これらの条件をベースに、さらに詳しい希望条件をお聞きします。<br>
+例えば：<br>
+• リモートワークの頻度<br>
+• 使用する技術スタックやツール<br>
+• 求める経験年数<br>
+• チーム規模や組織文化<br><br>
+まずは、どのような働き方を想定していますか？`;
+
+            console.log('💬 Adding initial message');
+            addMessage('bot', initialMessage);
+            console.log('✅ Initial message added');
+        }
+
+        // ページ読み込み完了時に初期化を実行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🎯 DOMContentLoaded - Initializing chat');
+                initChat();
+            });
+        } else {
+            console.log('🎯 DOM already loaded - Initializing chat');
+            initChat();
+        }
+    </script>
+</body>
+</html>

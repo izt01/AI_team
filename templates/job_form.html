@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>求人登録 - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #f5576c;
+            margin-left: 5px;
+        }
+
+        .optional {
+            color: #999;
+            font-weight: normal;
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .guide-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .guide-box h4 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .guide-box p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 求人登録</h1>
+            <p>詳細に入力いただくと、より適切な候補者をマッチングできます</p>
+        </div>
+
+        <form method="POST" action="/job/new" class="form-container">
+            <!-- 1. 求人基本情報 -->
+            <div class="section">
+                <h2 class="section-title">1. 求人基本情報</h2>
+
+                <div class="form-group">
+                    <label for="company_name">
+                        企業名
+                        <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="company_name" 
+                        name="company_name" 
+                        placeholder="株式会社○○、合同会社△△"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="job_title">
+                        職種
+                        <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="job_title" 
+                        name="job_title" 
+                        placeholder="Webエンジニア、UIデザイナー、プロダクトマネージャー"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="employment_type">
+                        雇用形態
+                        <span class="required">*</span>
+                    </label>
+                    <select id="employment_type" name="employment_type" required>
+                        <option value="">選択してください</option>
+                        <option value="正社員">正社員</option>
+                        <option value="契約社員">契約社員</option>
+                        <option value="業務委託">業務委託</option>
+                        <option value="アルバイト・パート">アルバイト・パート</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 2. 給与情報 -->
+            <div class="section">
+                <h2 class="section-title">2. 給与情報</h2>
+
+                <div class="two-col">
+                    <div class="form-group">
+                        <label for="salary_min">
+                            想定年収（下限）
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="salary_min" 
+                            name="salary_min" 
+                            placeholder="400"
+                            required
+                        >
+                        <div class="hint">万円単位で入力</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary_max">
+                            想定年収（上限）
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="salary_max" 
+                            name="salary_max" 
+                            placeholder="600"
+                            required
+                        >
+                        <div class="hint">万円単位で入力</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 勤務地 -->
+            <div class="section">
+                <h2 class="section-title">3. 勤務地</h2>
+
+                <div class="two-col">
+                    <div class="form-group">
+                        <label for="location_prefecture">
+                            都道府県
+                            <span class="required">*</span>
+                        </label>
+                        <select id="location_prefecture" name="location_prefecture" required>
+                            <option value="">選択してください</option>
+                            <option value="東京都">東京都</option>
+                            <option value="神奈川県">神奈川県</option>
+                            <option value="千葉県">千葉県</option>
+                            <option value="埼玉県">埼玉県</option>
+                            <option value="大阪府">大阪府</option>
+                            <option value="愛知県">愛知県</option>
+                            <option value="福岡県">福岡県</option>
+                            <option value="北海道">北海道</option>
+                            <!-- 他の都道府県も追加可能 -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location_city">
+                            市区町村
+                            <span class="optional">任意</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="location_city" 
+                            name="location_city" 
+                            placeholder="渋谷区、千代田区"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 応募条件 -->
+            <div class="section">
+                <h2 class="section-title">4. 応募条件</h2>
+
+                <div class="form-group">
+                    <label for="required_skills">
+                        必須スキル・経験
+                        <span class="required">*</span>
+                    </label>
+                    <textarea 
+                        id="required_skills" 
+                        name="required_skills" 
+                        placeholder="例: React での実務経験 2年以上、Git/GitHub を用いたチーム開発経験"
+                        required
+                        oninput="updateCharCount('required_skills', 'skillsCount', 500)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="skillsCount">0</span> / 500文字
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 求人詳細（任意・自由記述） -->
+            <div class="section">
+                <h2 class="section-title">5. 求人詳細（任意）</h2>
+
+                <div class="guide-box">
+                    <h4>💡 以下の項目について自由にご記入ください</h4>
+                    <p>詳細に答えていただくと求職者への紹介率が上がる可能性がございます</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="job_description">
+                        どんな仕事をしますか？（業務詳細、使用する技術など）
+                        <span class="optional">任意</span>
+                    </label>
+                    <textarea 
+                        id="job_description" 
+                        name="job_description" 
+                        placeholder="例: React/TypeScriptを使った自社サービスのフロントエンド開発。新機能の企画から実装、リリースまで一貫して担当していただきます。"
+                        oninput="updateCharCount('job_description', 'descCount', 1000)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="descCount">0</span> / 1000文字
+                    </div>
+                </div>
+
+                <div class="two-col" style="margin-bottom: 12px;">
+                <div>
+                    <label for="remote_option" style="margin-bottom: 6px;">
+                    リモート可否 <span class="required">*</span>
+                    </label>
+                    <select id="remote_option" name="remote_option" required>
+                    <option value="">選択してください</option>
+                    <option value="full_remote">フルリモート可</option>
+                    <option value="hybrid">一部リモート可（ハイブリッド）</option>
+                    <option value="on_site">リモート不可（出社のみ）</option>
+                    </select>
+                    <div class="hint">※ ユーザーのマッチング精度に直結するため必須です</div>
+                </div>
+
+                <div id="hybridDaysWrap" style="display:none;">
+                    <label for="hybrid_office_days_per_week" style="margin-bottom: 6px;">
+                    出社日数（週） <span class="required">*</span>
+                    </label>
+                    <input
+                    type="number"
+                    id="hybrid_office_days_per_week"
+                    name="hybrid_office_days_per_week"
+                    min="0" max="5" step="1"
+                    placeholder="例: 1"
+                    />
+                    <div class="hint">ハイブリッドの場合のみ必須（例：週1出社）</div>
+                </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="team_structure">
+                        チーム構成
+                        <span class="optional">任意</span>
+                    </label>
+                    <textarea 
+                        id="team_structure" 
+                        name="team_structure" 
+                        placeholder="例: エンジニア5名、デザイナー2名、プロダクトマネージャー1名"
+                        oninput="updateCharCount('team_structure', 'teamCount', 300)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="teamCount">0</span> / 300文字
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="benefits">
+                        福利厚生
+                        <span class="optional">任意</span>
+                    </label>
+                    <textarea 
+                        id="benefits" 
+                        name="benefits" 
+                        placeholder="例: 社会保険完備、交通費全額支給、書籍購入補助、リモートワーク手当"
+                        oninput="updateCharCount('benefits', 'benefitsCount', 300)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="benefitsCount">0</span> / 300文字
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="growth_opportunities">
+                        成長機会
+                        <span class="optional">任意</span>
+                    </label>
+                    <textarea 
+                        id="growth_opportunities" 
+                        name="growth_opportunities" 
+                        placeholder="例: 最新技術の導入に積極的、外部セミナー参加支援、社内勉強会"
+                        oninput="updateCharCount('growth_opportunities', 'growthCount', 300)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="growthCount">0</span> / 300文字
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="appeal_points">
+                        アピールポイント
+                        <span class="optional">任意</span>
+                    </label>
+                    <textarea 
+                        id="appeal_points" 
+                        name="appeal_points" 
+                        placeholder="例: 自社サービスの成長フェーズに携われる、裁量権が大きい、技術選定の自由度が高い"
+                        oninput="updateCharCount('appeal_points', 'appealCount', 300)"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="appealCount">0</span> / 300文字
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                求人を登録する
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function updateCharCount(textareaId, countId, maxLength) {
+            const textarea = document.getElementById(textareaId);
+            const count = document.getElementById(countId);
+            const currentLength = textarea.value.length;
+            count.textContent = currentLength;
+            
+            if (currentLength > maxLength) {
+                count.style.color = '#f5576c';
+            } else {
+                count.style.color = '#999';
+            }
+        }
+    </script>
+    
+    <script>
+  // リモート可否によって「出社日数（週）」を表示/必須化
+  (function initRemoteUi() {
+    const remoteSelect = document.getElementById('remote_option');
+    const hybridWrap = document.getElementById('hybridDaysWrap');
+    const hybridInput = document.getElementById('hybrid_office_days_per_week');
+    if (!remoteSelect || !hybridWrap || !hybridInput) return;
+
+    function apply() {
+      const v = remoteSelect.value;
+      const isHybrid = (v === 'hybrid');
+      hybridWrap.style.display = isHybrid ? 'block' : 'none';
+      hybridInput.required = isHybrid;
+      if (!isHybrid) hybridInput.value = '';
+    }
+    remoteSelect.addEventListener('change', apply);
+    apply();
+  })();
+</script>
+</body>
+</html>

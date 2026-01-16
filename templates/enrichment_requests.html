@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>追加情報リクエスト - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0366d6;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #586069;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav a:hover {
+            color: #0366d6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #24292e;
+        }
+        
+        .page-header p {
+            color: #586069;
+            line-height: 1.6;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e4e8;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-icon {
+            font-size: 1.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0366d6;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #586069;
+        }
+        
+        .requests-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #24292e;
+        }
+        
+        .request-card {
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .request-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .request-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #24292e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .request-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #586069;
+            margin-bottom: 1rem;
+        }
+        
+        .request-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .request-context {
+            background: #f6f8fa;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #586069;
+        }
+        
+        .answer-form {
+            margin-top: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #24292e;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0366d6;
+            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #0366d6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0256c1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f6f8fa;
+            color: #24292e;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .btn-secondary:hover {
+            background: #e1e4e8;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #586069;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0366d6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .toast.show {
+            display: block;
+        }
+        
+        .toast.error {
+            background: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        
+        .category-work_style { background: #e3f2fd; color: #1976d2; }
+        .category-benefits { background: #f3e5f5; color: #7b1fa2; }
+        .category-team { background: #fff3e0; color: #e65100; }
+        .category-culture { background: #e8f5e9; color: #388e3c; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🎯 JobMatch AI</div>
+        <nav class="nav">
+            <a href="/dashboard">ダッシュボード</a>
+            <a href="/jobs">求人一覧</a>
+            <a href="/enrichment/requests-page">追加情報リクエスト</a>
+            <a href="/logout">ログアウト</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>
+                📬 追加情報リクエスト
+                <span class="badge badge-warning" id="pendingCount">0</span>
+            </h1>
+            <p>
+                求職者のニーズに応じて、求人情報の充実をお願いしています。<br>
+                以下の質問にご回答いただくと、マッチング精度が向上し、より適切な候補者をご紹介できます。
+            </p>
+            
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-icon">📨</span>
+                    <div>
+                        <div class="stat-value" id="totalRequests">0</div>
+                        <div class="stat-label">未回答の質問</div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">👥</span>
+                    <div>
+                        <div class="stat-value" id="affectedUsers">0</div>
+                        <div class="stat-label">関心を持つ求職者</div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">✅</span>
+                    <div>
+                        <div class="stat-value" id="completionRate">0%</div>
+                        <div class="stat-label">回答率</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="requests-section">
+            <div class="section-header">
+                <h2>未回答の質問</h2>
+                <button class="btn btn-secondary" onclick="loadRequests()">
+                    🔄 更新
+                </button>
+            </div>
+            
+            <div id="requestsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: #586069;">読み込み中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        // ページ読み込み時に実行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRequests();
+        });
+        
+        // リクエスト一覧を読み込む
+        async function loadRequests() {
+            try {
+                const response = await fetch('/enrichment/pending-requests');
+                const requests = await response.json();
+                
+                displayRequests(requests);
+                updateStats(requests);
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showToast('データの読み込みに失敗しました', 'error');
+            }
+        }
+        
+        // リクエストを表示
+        function displayRequests(requests) {
+            const container = document.getElementById('requestsList');
+            
+            if (requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎉</div>
+                        <h3>すべての質問に回答済みです</h3>
+                        <p style="margin-top: 0.5rem;">現在、追加情報のリクエストはありません。</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = requests.map(req => `
+                <div class="request-card" id="request-${req.request_id}">
+                    <div class="request-header">
+                        <div>
+                            <div class="request-title">
+                                ${req.category ? `<span class="category-badge category-${req.category}">${getCategoryLabel(req.category)}</span>` : ''}
+                                ${req.label || req.question}
+                            </div>
+                            <div style="color: #586069; font-size: 0.9rem; margin-top: 0.25rem;">
+                                求人: ${req.job_title}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="request-meta">
+                        <div class="request-meta-item">
+                            👥 ${req.affected_user_count}名が関心
+                        </div>
+                        <div class="request-meta-item">
+                            📅 ${req.days_pending}日前に送信
+                        </div>
+                    </div>
+                    
+                    <div class="request-context">
+                        💡 ${req.question_context}
+                    </div>
+                    
+                    <form class="answer-form" onsubmit="submitAnswer(event, ${req.request_id})">
+                        <div class="form-group">
+                            <label for="answer-${req.request_id}">${req.question}</label>
+                            ${generateInputField(req)}
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                ✅ 回答を送信
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="skipRequest(${req.request_id})">
+                                ⏭️ スキップ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `).join('');
+        }
+        
+        // 入力フィールドを生成
+        function generateInputField(req) {
+            const fieldName = `answer-${req.request_id}`;
+            
+            switch (req.field_type) {
+                case 'boolean':
+                    return `
+                        <select id="${fieldName}" name="answer" required>
+                            <option value="">選択してください</option>
+                            <option value="true">はい</option>
+                            <option value="false">いいえ</option>
+                        </select>
+                    `;
+                
+                case 'select':
+                    if (!req.options) {
+                        return `<input type="text" id="${fieldName}" name="answer" required>`;
+                    }
+                    const options = JSON.parse(req.options);
+                    return `
+                        <select id="${fieldName}" name="answer" required>
+                            <option value="">選択してください</option>
+                            ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    `;
+                
+                case 'number':
+                    return `<input type="number" id="${fieldName}" name="answer" placeholder="例: 10" required>`;
+                
+                case 'time':
+                    return `<input type="time" id="${fieldName}" name="answer" required>`;
+                
+                case 'textarea':
+                    return `<textarea id="${fieldName}" name="answer" placeholder="詳しく記入してください" required></textarea>`;
+                
+                default:
+                    return `<input type="text" id="${fieldName}" name="answer" placeholder="回答を入力してください" required>`;
+            }
+        }
+        
+        // カテゴリラベルを取得
+        function getCategoryLabel(category) {
+            const labels = {
+                'work_style': '働き方',
+                'benefits': '福利厚生',
+                'team': 'チーム',
+                'culture': '企業文化',
+                'basic': '基本情報'
+            };
+            return labels[category] || category;
+        }
+        
+        // 統計情報を更新
+        function updateStats(requests) {
+            document.getElementById('pendingCount').textContent = requests.length;
+            document.getElementById('totalRequests').textContent = requests.length;
+            
+            const totalUsers = requests.reduce((sum, req) => sum + (req.affected_user_count || 0), 0);
+            document.getElementById('affectedUsers').textContent = totalUsers;
+            
+            // TODO: 実際の回答率を計算（answered / total）
+            document.getElementById('completionRate').textContent = '85%';
+        }
+        
+        // 回答を送信
+        async function submitAnswer(event, requestId) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const answerInput = form.querySelector('[name="answer"]');
+            const answer = answerInput.value;
+            
+            if (!answer) {
+                showToast('回答を入力してください', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/enrichment/answer/${requestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ answer })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('✅ 回答を保存しました', 'success');
+                    
+                    // カードをフェードアウト
+                    const card = document.getElementById(`request-${requestId}`);
+                    card.style.transition = 'opacity 0.3s, transform 0.3s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateX(-20px)';
+                    
+                    // 300ms後にリストを再読み込み
+                    setTimeout(() => {
+                        loadRequests();
+                    }, 300);
+                } else {
+                    showToast('❌ ' + (result.error || '回答の保存に失敗しました'), 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting answer:', error);
+                showToast('❌ エラーが発生しました', 'error');
+            }
+        }
+        
+        // リクエストをスキップ
+        function skipRequest(requestId) {
+            if (!confirm('この質問をスキップしますか？')) {
+                return;
+            }
+            
+            const card = document.getElementById(`request-${requestId}`);
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                card.remove();
+                
+                // 残りのリクエストがなければ空状態を表示
+                const remaining = document.querySelectorAll('.request-card').length;
+                if (remaining === 0) {
+                    loadRequests();
+                }
+            }, 300);
+        }
+        
+        // トースト通知を表示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

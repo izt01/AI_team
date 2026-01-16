@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>求人登録（動的フォーム） - JobMatch AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0366d6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+        }
+        
+        .form-header {
+            margin-bottom: 2rem;
+        }
+        
+        .form-header h1 {
+            font-size: 2rem;
+            color: #24292e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header p {
+            color: #586069;
+            line-height: 1.6;
+        }
+        
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #24292e;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e1e4e8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #24292e;
+            font-size: 0.95rem;
+        }
+        
+        .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: #f8f9fa;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0366d6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+        
+        .form-hint {
+            font-size: 0.85rem;
+            color: #586069;
+            margin-top: 0.5rem;
+            display: block;
+        }
+        
+        .guided-section {
+            background: #f6f8fa;
+            border: 2px dashed #d1d5da;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .guided-section-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #24292e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .guided-section textarea {
+            background: white;
+            border: 1px solid #d1d5da;
+        }
+        
+        .hint-list {
+            font-size: 0.85rem;
+            color: #586069;
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+        
+        .hint-list li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e1e4e8;
+        }
+        
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #0366d6;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: #0256c1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f6f8fa;
+            color: #24292e;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .btn-secondary:hover {
+            background: #e1e4e8;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0366d6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .dynamic-field {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-box p {
+            color: #1565c0;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🎯 JobMatch AI</div>
+    </header>
+    
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>📝 求人情報登録</h1>
+                <p>基本情報を入力後、詳細を自由に記述してください。AIが自動で構造化データに変換します。</p>
+            </div>
+            
+            <div class="info-box">
+                <p>💡 このフォームは自動更新されます。頻繁に求められる項目は、今後「基本項目」として表示されるようになります。</p>
+            </div>
+            
+            <form id="jobForm" method="POST" action="/job/new">
+                <!-- 基本情報セクション -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">📋</span>
+                        基本情報
+                    </div>
+                    
+                    <div id="requiredFields">
+                        <!-- 動的に生成される必須項目 -->
+                    </div>
+                </div>
+                
+                <!-- ガイド付き自由記述セクション -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">✍️</span>
+                        求人詳細（ガイド付き自由記述）
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            💼 どんな仕事をしますか?
+                        </div>
+                        <textarea 
+                            name="job_content" 
+                            placeholder="例:&#10;• React/TypeScriptを使った自社SaaSのフロントエンド開発&#10;• 新機能の設計から実装、テストまで一貫して担当&#10;• UXデザイナーと協力してUI改善も行います"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>具体的な業務内容</li>
+                            <li>使用する技術・ツール</li>
+                            <li>担当するフェーズ（設計/実装/運用など）</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            🏠 どんな働き方ができますか?
+                        </div>
+                        <textarea 
+                            name="work_style" 
+                            placeholder="例:&#10;• 週2日リモート可（水曜・金曜）&#10;• 10時出社もOK（コアタイム11-15時）&#10;• 服装自由"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>リモートワークの頻度</li>
+                            <li>出社時間の柔軟性</li>
+                            <li>服装規定、残業の頻度</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            👥 どんなチームですか?
+                        </div>
+                        <textarea 
+                            name="team_culture" 
+                            placeholder="例:&#10;• エンジニア8名、デザイナー2名、PdM1名&#10;• 週1で1on1、月1でふりかえり会&#10;• 年齢関係なくフラットに意見を言える雰囲気"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>チームの人数・構成</li>
+                            <li>コミュニケーションの頻度</li>
+                            <li>チームの雰囲気・文化</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            🎁 どんな福利厚生がありますか?
+                        </div>
+                        <textarea 
+                            name="benefits" 
+                            placeholder="例:&#10;• 書籍購入補助（月3万円まで）&#10;• カンファレンス参加費全額補助&#10;• 社員食堂あり（ランチ補助）"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>学習支援制度</li>
+                            <li>各種手当</li>
+                            <li>ユニークな福利厚生</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            🌱 どんな成長機会がありますか?
+                        </div>
+                        <textarea 
+                            name="growth" 
+                            placeholder="例:&#10;• 社内勉強会を月2回開催&#10;• メンター制度あり&#10;• 新技術の導入を積極的に推奨"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>研修制度</li>
+                            <li>勉強会の頻度</li>
+                            <li>キャリアパスの選択肢</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="guided-section">
+                        <div class="guided-section-title">
+                            ✨ その他のアピールポイントは?
+                        </div>
+                        <textarea 
+                            name="appeal" 
+                            placeholder="例:&#10;• 現在、新規サービスの立ち上げフェーズ&#10;• 最新のMacBook Pro + 4Kディスプレイ2台支給&#10;• オフィスにサウナ完備&#10;• 副業OK"
+                        ></textarea>
+                        <ul class="hint-list">
+                            <li>プロジェクトの状況</li>
+                            <li>オフィス環境・設備</li>
+                            <li>ユニークな制度</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 任意項目（動的に追加される） -->
+                <div class="section" id="optionalSection" style="display: none;">
+                    <div class="section-title">
+                        <span class="section-icon">⚙️</span>
+                        追加情報（任意）
+                    </div>
+                    
+                    <div id="optionalFields">
+                        <!-- 動的に生成される任意項目 -->
+                    </div>
+                </div>
+                
+                <!-- ボタン -->
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="history.back()">
+                        キャンセル
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        📤 求人を登録する
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>基本項目を読み込んでいます...</p>
+        </div>
+    </div>
+    
+    <script>
+        // ページ読み込み時に実行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBaselineFields();
+        });
+        
+        // 基本項目を読み込む
+        async function loadBaselineFields() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('show');
+            
+            try {
+                const response = await fetch('/enrichment/baseline-fields');
+                const data = await response.json();
+                
+                // 必須項目を生成
+                renderFields(data.required_fields, 'requiredFields', true);
+                
+                // 任意項目を生成
+                if (data.optional_fields && data.optional_fields.length > 0) {
+                    renderFields(data.optional_fields, 'optionalFields', false);
+                    document.getElementById('optionalSection').style.display = 'block';
+                }
+                
+                overlay.classList.remove('show');
+            } catch (error) {
+                console.error('Error loading baseline fields:', error);
+                overlay.classList.remove('show');
+                alert('基本項目の読み込みに失敗しました。ページを再読み込みしてください。');
+            }
+        }
+        
+        // フィールドを描画
+        function renderFields(fields, containerId, isRequired) {
+            const container = document.getElementById(containerId);
+            
+            fields.forEach(field => {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group dynamic-field';
+                
+                // ラベル
+                const label = document.createElement('label');
+                label.setAttribute('for', field.field_name);
+                label.innerHTML = field.label;
+                if (isRequired || field.required) {
+                    label.innerHTML += '<span class="required">*</span>';
+                }
+                formGroup.appendChild(label);
+                
+                // 入力フィールド
+                const input = createInputElement(field);
+                formGroup.appendChild(input);
+                
+                // ヒント
+                if (field.placeholder) {
+                    const hint = document.createElement('span');
+                    hint.className = 'form-hint';
+                    hint.textContent = field.placeholder;
+                    formGroup.appendChild(hint);
+                }
+                
+                container.appendChild(formGroup);
+            });
+        }
+        
+        // 入力要素を生成
+        function createInputElement(field) {
+            let input;
+            
+            switch (field.field_type) {
+                case 'select':
+                    input = document.createElement('select');
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    
+                    // 空のオプション
+                    const emptyOption = document.createElement('option');
+                    emptyOption.value = '';
+                    emptyOption.textContent = '選択してください';
+                    input.appendChild(emptyOption);
+                    
+                    // オプションを追加
+                    if (field.options) {
+                        const options = JSON.parse(field.options);
+                        options.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.textContent = opt;
+                            input.appendChild(option);
+                        });
+                    }
+                    break;
+                
+                case 'textarea':
+                    input = document.createElement('textarea');
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    input.placeholder = field.placeholder || '';
+                    break;
+                
+                case 'number':
+                    input = document.createElement('input');
+                    input.type = 'number';
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    input.placeholder = field.placeholder || '';
+                    break;
+                
+                case 'time':
+                    input = document.createElement('input');
+                    input.type = 'time';
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    break;
+                
+                case 'boolean':
+                    input = document.createElement('select');
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    
+                    const boolOptions = [
+                        { value: '', text: '選択してください' },
+                        { value: 'true', text: 'はい' },
+                        { value: 'false', text: 'いいえ' }
+                    ];
+                    
+                    boolOptions.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt.value;
+                        option.textContent = opt.text;
+                        input.appendChild(option);
+                    });
+                    break;
+                
+                default:
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = field.field_name;
+                    input.name = field.field_name;
+                    input.placeholder = field.placeholder || '';
+            }
+            
+            if (field.required) {
+                input.required = true;
+            }
+            
+            return input;
+        }
+        
+        // フォーム送信時の処理
+        document.getElementById('jobForm').addEventListener('submit', function(event) {
+            // バリデーション等の処理をここに追加できます
+            console.log('フォームを送信します');
+        });
+    </script>
+</body>
+</html>
